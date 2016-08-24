@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>JSON Compress</title>
+    <link rel="stylesheet" href="assets/bootstrap.min.css">
+</head>
+<style>
+    #input {
+        font-family: Menlo, Monaco, Consolas, "Courier New", monospace
+    }
+
+    #output:empty {
+        display: none;
+    }
+</style>
+<body>
+
+<div class="container">
+    <form id="input-form">
+        <h1>JSON Compress</h1>
+        <hr>
+        <h4>Settings:</h4>
+        <label class="radio-inline">
+            <input type="radio" name="action" id="action1" value="decompress" checked>
+            Decompress
+        </label>
+        <label class="radio-inline">
+            <input type="radio" name="action" id="action2" value="compress">
+            Compress
+        </label>
+
+        <div class="checkbox">
+            <label>
+                <input type="checkbox" name="stripslashes" value="1"> Strip slashes
+            </label>
+        </div>
+        <hr>
+        <h4>Input:</h4>
+        <div class="form-group">
+            <label for="input" class="sr-only">Input</label>
+            <textarea class="form-control" id="input" name="input" rows="10"></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-default">Process</button>
+    </form>
+
+    <hr>
+
+    <h4>Output:</h4>
+    <pre id="output"></pre>
+</div>
+
+
+<script src="assets/jquery.min.js"></script>
+<script src="assets/jsonc.min.js"></script>
+<script>
+    (function ($) {
+
+        var $form = $('#input-form');
+        var $output = $('#output');
+        var submittedData, input, outputHtml;
+
+        $form.submit(handleSubmit);
+
+        /**
+         * Convert JSON to compressed format
+         *
+         * @param input
+         * @returns {string}
+         */
+        function compress(input) {
+            return stringify(JSONC.compress(JSON.parse(input)));
+        }
+
+        /**
+         * Expand compressed JSON string
+         *
+         * @param input
+         * @returns {string}
+         */
+        function decompress(input) {
+            try {
+                return stringify(JSONC.decompress(JSON.parse(input)));
+            } catch (e) {
+                alert('Unable to decompress. Are you submitting a compressed string?')
+            }
+        }
+
+        /**
+         * Handle the form submit task, and render output
+         */
+        function handleSubmit(event) {
+            event.preventDefault();
+            submittedData = getSubmittedData.call(this);
+            input = (submittedData.stripslashes) ? stripslashes(submittedData.input) : submittedData.input;
+            outputHtml = (submittedData.action === 'compress') ? compress(input) : decompress(input);
+            $output.html(outputHtml);
+        }
+
+        /**
+         * Take submitted data and convert it into a data object
+         *
+         * @returns {Object}
+         */
+        function getSubmittedData() {
+            var data = {};
+            $(this).serializeArray().forEach(function (input) {
+                data[input.name] = input.value;
+            });
+            return data;
+        }
+
+        /**
+         * Javascript equivalent to PHP's stripslashes
+         *
+         * @link http://locutus.io/php/strings/stripslashes/
+         *
+         * @param str
+         * @returns {string}
+         */
+        function stripslashes(str) {
+            return (str + '')
+                    .replace(/\\(.?)/g, function (s, n1) {
+                        switch (n1) {
+                            case '\\':
+                                return '\\';
+                            case '0':
+                                return '\u0000';
+                            case '':
+                                return '';
+                            default:
+                                return n1
+                        }
+                    });
+        }
+
+        /**
+         * Convert object to pretty print JSON
+         *
+         * @param object
+         * @returns {string}
+         */
+        function stringify(object) {
+            return JSON.stringify(object, null, 4);
+        }
+
+    })(window.jQuery);
+</script>
+</body>
+</html>

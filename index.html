@@ -38,7 +38,7 @@
             </label>
         </div>
         <hr>
-        <h4>Input:</h4>
+        <h4>JSON Input:</h4>
         <div class="form-group">
             <label for="input" class="sr-only">Input</label>
             <textarea class="form-control" id="input" name="input" rows="10"></textarea>
@@ -49,7 +49,7 @@
 
     <hr>
 
-    <h4>Output:</h4>
+    <h4>JSON Output:</h4>
     <pre id="output"></pre>
 </div>
 
@@ -72,7 +72,11 @@
          * @returns {string}
          */
         function compress(input) {
-            return stringify(JSONC.compress(JSON.parse(input)));
+            try {
+                return stringify(JSONC.compress(JSON.parse(input)));
+            } catch (e) {
+                alert('Invalid format.');
+            }
         }
 
         /**
@@ -85,7 +89,7 @@
             try {
                 return stringify(JSONC.decompress(JSON.parse(input)));
             } catch (e) {
-                alert('Unable to decompress. Are you submitting a compressed string?')
+                alert('Invalid format.');
             }
         }
 
